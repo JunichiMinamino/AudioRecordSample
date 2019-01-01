@@ -1,19 +1,28 @@
-package com.loopsessions.sample.audiorecord;
+package com.loopsessions.audiorecordsample;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
 	private static final String TAG = "MainActivity";
+
+	private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 100;
+
 	public final static int SAMPLING_RATE = 44100;
 
 	private int m_iSampleSize = 0;
@@ -76,7 +85,37 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
+		checkPermission();
     }
+
+	private void checkPermission() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+				// put your code for Version>=Marshmallow
+
+			} else {
+				if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+					Toast.makeText(this, "App required access to audio", Toast.LENGTH_SHORT).show();
+				}
+				requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+			}
+
+		} else {
+			// put your code for Version < Marshmallow
+		}
+
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+		if (requestCode == MY_PERMISSIONS_REQUEST_RECORD_AUDIO) {
+			if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+				Toast.makeText(getApplicationContext(), "Application will not have audio on record", Toast.LENGTH_SHORT).show();
+			}
+		}
+	}
 
 	// Recに必要なデータを確保
 	private void initAudioRecord() {
